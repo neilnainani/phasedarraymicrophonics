@@ -1,0 +1,43 @@
+Phased Array grid dataset - validation report
+==============================================
+
+Usable grid points: 23 / 23
+  X: constant 1.15  (model cannot learn this axis)
+  Y: 23 values 0.1..2.3 m, spacing 0.100-0.100 m
+     spatial Nyquist: phase is only sampled finely enough below ~1715 Hz; above that the model can learn level/reverb, not exact waveforms
+  Z: constant 0.87  (model cannot learn this axis)
+  Grid dimensionality: 1-D (Y)
+
+Channel levels (median RMS incl. noise): Mic2 -39.6 dB, Mic3 -34.4 dB, Mic4 -30.5 dB
+  -> channels differ by >3 dB: preamp gains are not matched. The model learns each mic's gain as-is; calibrate before comparing mics physically.
+
+Playback/recording are not synchronized: in 17 takes the sweep started before recording (worst 713 ms, losing only < 103 Hz).
+  Absolute arrival time is therefore unknown; only timing *between* mics of the same take is
+  kept. Starting playback ~0.5 s after recording starts (capture.sh) would remove this.
+
+Non-grid sessions ignored (no position/sweep): ['10321800', '10321801', '10321802', '10323500', '10323501', '11313000', '11313001', '11313500', '11331800', '11333500']
+
+Per-take results:
+  [OK] Grid_X1.15_Y0.1_Z0.87  onset=449.9 ms  PNR={2: 59.3, 3: 57.5, 4: 59.3}
+  [OK] Grid_X1.15_Y0.2_Z0.87  onset=-8.0 ms  PNR={2: 58.5, 3: 59.8, 4: 61.3}
+  [OK] Grid_X1.15_Y0.3_Z0.87  onset=-274.6 ms  PNR={2: 59.0, 3: 61.8, 4: 63.1}
+  [OK] Grid_X1.15_Y0.4_Z0.87  onset=485.6 ms  PNR={2: 62.1, 3: 59.2, 4: 60.9}
+  [OK] Grid_X1.15_Y0.5_Z0.87  onset=-453.4 ms  PNR={2: 60.7, 3: 64.9, 4: 59.8}
+  [OK] Grid_X1.15_Y0.6_Z0.87  onset=-397.6 ms  PNR={2: 60.6, 3: 63.7, 4: 59.2}
+  [OK] Grid_X1.15_Y0.7_Z0.87  onset=102.8 ms  PNR={2: 61.1, 3: 64.6, 4: 60.0}
+  [OK] Grid_X1.15_Y0.8_Z0.87  onset=-269.1 ms  PNR={2: 60.1, 3: 64.9, 4: 62.0}
+  [OK] Grid_X1.15_Y0.9_Z0.87  onset=54.4 ms  PNR={2: 61.8, 3: 62.3, 4: 60.7}
+  [OK] Grid_X1.15_Y1.1_Z0.87  onset=-161.2 ms  PNR={2: 63.1, 3: 60.1, 4: 60.5}
+  [OK] Grid_X1.15_Y1.2_Z0.87  onset=534.5 ms  PNR={2: 64.5, 3: 60.6, 4: 63.4}
+  [OK] Grid_X1.15_Y1.3_Z0.87  onset=-527.5 ms  PNR={2: 62.9, 3: 64.3, 4: 61.1}
+  [OK] Grid_X1.15_Y1.4_Z0.87  onset=-54.9 ms  PNR={2: 61.5, 3: 72.4, 4: 62.2}
+  [OK] Grid_X1.15_Y1.5_Z0.87  onset=-146.9 ms  PNR={2: 60.8, 3: 73.0, 4: 61.6}
+  [OK] Grid_X1.15_Y1.6_Z0.87  onset=-609.4 ms  PNR={2: 59.6, 3: 75.3, 4: 62.1}
+  [OK] Grid_X1.15_Y1.7_Z0.87  onset=-713.0 ms  PNR={2: 62.5, 3: 69.2, 4: 60.0}
+  [OK] Grid_X1.15_Y1.8_Z0.87  onset=-403.2 ms  PNR={2: 62.4, 3: 64.5, 4: 61.4}
+  [OK] Grid_X1.15_Y1.9_Z0.87  onset=-702.7 ms  PNR={2: 62.4, 3: 70.0, 4: 60.1}
+  [OK] Grid_X1.15_Y1_Z0.87  onset=15.7 ms  PNR={2: 60.6, 3: 62.6, 4: 62.9}
+  [OK] Grid_X1.15_Y2.1_Z0.87  onset=-294.3 ms  PNR={2: 59.8, 3: 62.0, 4: 62.8}
+  [OK] Grid_X1.15_Y2.2_Z0.87  onset=-251.5 ms  PNR={2: 62.8, 3: 61.6, 4: 61.2}
+  [OK] Grid_X1.15_Y2.3_Z0.87  onset=-431.4 ms  PNR={2: 61.6, 3: 62.3, 4: 62.7}
+  [OK] Grid_X1.15_Y2_Z0.87  onset=-670.2 ms  PNR={2: 60.4, 3: 63.1, 4: 63.0}
