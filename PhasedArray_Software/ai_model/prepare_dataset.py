@@ -1,7 +1,7 @@
 #######################################
 #
 #      Phased Array Microphonics
-# Validate the grid recordings and turn them
+# Validate the grid recordings (MICRECORD/Oct2026recordings) and turn them
 # into the impulse-response training set
 #
 # Usage (from PhasedArray_Software/):
@@ -30,13 +30,13 @@ SPEED_OF_SOUND = 343.0
 def check_take(name, pos, deconv, cfg):
     """Run every per-file and per-take check. Returns (rows, take_info, irs_or_None)."""
     d = cfg.data
-    indiv = os.path.join(d.micrecord_dir, name, "INDIV")
+    indiv = os.path.join(d.recordings_dir, name, "INDIV")
     rows, recs, problems, warnings = [], {}, [], []
 
     for mic in d.mic_ids:
         path = os.path.join(indiv, f"Mic{mic}_{name}.wav")
         row = {"take": name, "x": pos[0], "y": pos[1], "z": pos[2], "mic": mic,
-               "path": os.path.relpath(path, d.micrecord_dir)}
+               "path": os.path.relpath(path, d.recordings_dir)}
         if not os.path.isfile(path):
             row["status"] = "MISSING"
             problems.append(f"Mic{mic} missing")
@@ -147,11 +147,15 @@ def main():
 
     sr, dry, _ = ac.read_wav(os.path.join(d.micrecord_dir, d.dry_sweep_file))
     assert sr == d.capture_sr, f"dry sweep is {sr} Hz, expected {d.capture_sr}"
-    points = ac.list_grid_points(d.micrecord_dir, d.grid_prefix)
+    if not os.path.isdir(d.recordings_dir):
+        print(f"No recordings folder yet: {d.recordings_dir}")
+        return 1
+    print(f"Reading takes from {d.recordings_dir}")
+    points = ac.list_grid_points(d.recordings_dir, d.grid_prefix)
     bad_names = [n for n, p in points if p is None]
     points = [(n, p) for n, p in points if p is not None]
-    others = [n for n in os.listdir(d.micrecord_dir)
-              if os.path.isdir(os.path.join(d.micrecord_dir, n)) and not n.startswith(d.grid_prefix)]
+    others = [n for n in os.listdir(d.recordings_dir)
+              if os.path.isdir(os.path.join(d.recordings_dir, n)) and not n.startswith(d.grid_prefix)]
     deconv = ac.Deconvolver(dry, sr, int(d.expected_duration_s * sr) + sr, d)
 
     all_rows, takes, irs, kept = [], [], [], []

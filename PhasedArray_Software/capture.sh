@@ -27,7 +27,9 @@ COUNTDOWN=${5:-3}
 
 # Map the coordinates to a session code format your dataset can read
 SESSION_CODE="Grid_X${SAD_X}_Y${SOD_Y}_Z${Z_COORD}"
-BASE_DIR="../MICRECORD/${SESSION_CODE}"
+# Keep in sync with RECORDINGS_FOLDER in collect_dataset_point.py
+RECORDINGS_FOLDER="Oct2026recordings"
+BASE_DIR="../MICRECORD/${RECORDINGS_FOLDER}/${SESSION_CODE}"
 INDIV_DIR="${BASE_DIR}/INDIV"
 
 # Create the standard Phased Array Microphonics directory structure
@@ -55,7 +57,7 @@ echo "Loading audio libraries..."
 # system.py beamforming and just records the raw data to the INDIV folder.
 # -------------------------------------------------------------------------
 
-python3 collect_dataset_point.py --code "$SESSION_CODE" --duration "$DURATION" --countdown "$COUNTDOWN"
+python3 collect_dataset_point.py --code "$SESSION_CODE" --duration "$DURATION" --countdown "$COUNTDOWN" --folder "$RECORDINGS_FOLDER"
 
 echo "✅ Capture complete for X=$SAD_X, Y=$SOD_Y, Z=$Z_COORD!"
 echo "Move target mic stand to the next grid point!"

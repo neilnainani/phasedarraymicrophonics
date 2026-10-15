@@ -13,6 +13,11 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(errors="replace", line_buffering=True)
 
 
+# Recordings go to MICRECORD/<RECORDINGS_FOLDER>/<code>/INDIV. Keep in sync with
+# RECORDINGS_FOLDER in capture.sh and recordings_dir in ai_model/config.py.
+RECORDINGS_FOLDER = "Oct2026recordings"
+
+
 def say(msg):
     print(msg, flush=True)
 
@@ -24,6 +29,8 @@ def main():
     parser.add_argument("--duration", type=float, required=True)
     parser.add_argument("--countdown", type=int, default=3,
                         help="seconds of countdown before recording starts")
+    parser.add_argument("--folder", type=str, default=RECORDINGS_FOLDER,
+                        help="session folder inside MICRECORD/ to save into")
     args = parser.parse_args()
 
     # Configuration: Ensure this matches your hardware!
@@ -32,7 +39,7 @@ def main():
 
     # 2. Setup Directories
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    output_dir = os.path.join(script_dir, "..", "MICRECORD", args.code, "INDIV")
+    output_dir = os.path.join(script_dir, "..", "MICRECORD", args.folder, args.code, "INDIV")
     os.makedirs(output_dir, exist_ok=True)
 
     say(f"Session {args.code}: get ready, wait for the RECORDING cue before pressing play.")

@@ -19,7 +19,10 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 class DataConfig:
     # --- Where things live ---
     micrecord_dir: str = os.path.normpath(os.path.join(_HERE, "..", "..", "MICRECORD"))
-    dry_sweep_file: str = "dry_sweep.wav"
+    # Session folder the Grid_* takes are read from (collect_dataset_point.py writes here).
+    # The first run's 23 takes sit directly in MICRECORD/; point this at micrecord_dir to use them.
+    recordings_dir: str = os.path.join(micrecord_dir, "Oct2026recordings")
+    dry_sweep_file: str = "dry_sweep.wav"   # read from micrecord_dir
     grid_prefix: str = "Grid_"
     cache_file: str = os.path.join(_HERE, "data", "ir_dataset.pt")
     report_dir: str = os.path.join(_HERE, "data")
