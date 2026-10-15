@@ -12,7 +12,7 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
-if [ "$#" -ne 3 ]; then
+if [ "$#" -lt 3 ] || [ "$#" -gt 5 ]; then
     echo "Usage: ./capture.sh <SAD_X_COORD> <SOD_Y_COORD> <Z_COORD> [DURATION_SEC] [COUNTDOWN_SEC]"
     echo "Example (defaults): ./capture.sh 1.5 2.0 1.2"
     echo "Example (custom): ./capture.sh 1.5 2.0 1.2 10 5"
@@ -43,13 +43,10 @@ echo "Countdown Buffer: $COUNTDOWN seconds"
 echo "Output Directory: $INDIV_DIR"
 echo "======================================"
 
-# 3-second countdown to eliminate handling noise
-echo -n "Starting capture in 3... "
-for ((i=COUNTDOWN; i>0; i--)); do
-    echo -n "$i... "
-    sleep 1
-done
-echo "RECORDING for $DURATION seconds!"
+# The countdown and the RECORDING cue are printed by collect_dataset_point.py,
+# so the cue appears only once the input stream is running (Python takes
+# 1-2 s to start on Windows; a cue printed here would come too early).
+echo "Loading audio libraries..."
 
 # -------------------------------------------------------------------------
 # HARDWARE CAPTURE
@@ -58,7 +55,7 @@ echo "RECORDING for $DURATION seconds!"
 # system.py beamforming and just records the raw data to the INDIV folder.
 # -------------------------------------------------------------------------
 
-python3 collect_dataset_point.py --code "$SESSION_CODE" --duration $DURATION
+python3 collect_dataset_point.py --code "$SESSION_CODE" --duration "$DURATION" --countdown "$COUNTDOWN"
 
 echo "✅ Capture complete for X=$SAD_X, Y=$SOD_Y, Z=$Z_COORD!"
 echo "Move target mic stand to the next grid point!"
