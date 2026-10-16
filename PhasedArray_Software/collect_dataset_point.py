@@ -3,6 +3,11 @@ import os
 import sys
 import time
 import numpy as np
+
+# The Behringer UMC driver's ASIO device gives all 4 inputs at the requested
+# rate with no Windows mixing/resampling; sounddevice only lists ASIO devices
+# when this is set before it is imported.
+os.environ.setdefault("SD_ENABLE_ASIO", "1")
 import sounddevice as sd
 import soundfile as sf
 
@@ -18,8 +23,31 @@ if hasattr(sys.stdout, "reconfigure"):
 RECORDINGS_FOLDER = "Oct2026recordings"
 
 
+# Interface used when --device is not given: the first input whose name contains
+# one of these, in order (the ASIO device first, then the 4-input Windows device).
+PREFERRED_DEVICES = ("UMC ASIO", "IN 1-4 (BEHRINGER UMC")
+
+
 def say(msg):
     print(msg, flush=True)
+
+
+def pick_input_device(requested, channels):
+    """Return the input device index to record from."""
+    devices = sd.query_devices()
+    if requested is not None:
+        if requested.isdigit():
+            return int(requested)
+        names = [requested]
+    else:
+        names = PREFERRED_DEVICES
+    for name in names:
+        for i, dev in enumerate(devices):
+            if name.lower() in dev["name"].lower() and dev["max_input_channels"] >= channels:
+                return i
+    if requested is not None:
+        raise RuntimeError(f"no input device matching '{requested}' with {channels} channels")
+    return sd.default.device[0]   # fall back to the Windows default input
 
 
 def main():
@@ -31,6 +59,8 @@ def main():
                         help="seconds of countdown before recording starts")
     parser.add_argument("--folder", type=str, default=RECORDINGS_FOLDER,
                         help="session folder inside MICRECORD/ to save into")
+    parser.add_argument("--device", type=str, default=None,
+                        help="input device index or name (default: the UMC404HD, ASIO first)")
     args = parser.parse_args()
 
     # Configuration: Ensure this matches your hardware!
@@ -45,6 +75,10 @@ def main():
     say(f"Session {args.code}: get ready, wait for the RECORDING cue before pressing play.")
 
     try:
+        device = pick_input_device(args.device, CHANNELS)
+        dev = sd.query_devices(device)
+        say(f"Input device {device}: {dev['name']} ({sd.query_hostapis(dev['hostapi'])['name']})")
+
         # 3. Countdown here rather than in capture.sh, so it runs after the
         # (slow, 1-2 s on Windows) library imports and the cue below is
         # printed only once the input stream is actually running.
@@ -56,6 +90,7 @@ def main():
         recording = sd.rec(int(args.duration * SAMPLE_RATE),
                            samplerate=SAMPLE_RATE,
                            channels=CHANNELS,
+                           device=device,
                            dtype='float32')
         say(f">>> RECORDING for {args.duration:g} seconds! Press play now. <<<")
         sd.wait()
@@ -71,15 +106,18 @@ def main():
 
             # Save to standard 16-bit PCM WAV
             sf.write(filepath, single_channel_data, SAMPLE_RATE, subtype='PCM_16')
-            say(f"  -> Saved {filename}  (peak {np.max(np.abs(single_channel_data)):.2f})")
+            peak = np.max(np.abs(single_channel_data))
+            say(f"  -> Saved {filename}  (peak {peak:.2f})")
+            if peak < 1e-3:
+                say(f"     WARNING: Mic{mic_num} is silent - check its cable, gain knob and 48 V")
 
         say("Hardware capture complete.")
 
     except Exception as e:
         say(f"ERROR: Failed to record audio. Details:\n{e}")
-        say("\nTROUBLESHOOTING: Run this in a python shell to find your mic's device ID:")
-        say("   import sounddevice as sd; print(sd.query_devices())")
-        say("   Then add `device=YOUR_DEVICE_ID` to the sd.rec() function.")
+        say("\nTROUBLESHOOTING: list the devices with  python -m sounddevice")
+        say("   then pass the right one with  --device <index or name>.")
+        say("   The ASIO device fails if another program (DAW, browser tab) is using it.")
         sys.exit(1)
 
 if __name__ == "__main__":
